@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e293b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Scopa Scorekeeper</title>
+    <style>
+        :root {
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --primary: #1e293b;
+            --accent: #0f766e;
+            --gold: #d97706;
+            --gold-light: #fef3c7;
+            --danger: #dc2626;
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: var(--card);
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+
+        /* Header & Settings Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .app-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .target-selector {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--muted);
+            background: var(--bg);
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+        .target-selector select {
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Mode Switcher Pills */
+        .mode-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            background: var(--bg);
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+        }
+        .mode-btn {
+            border: none;
+            background: transparent;
+            padding: 8px 4px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .mode-btn.active {
+            background: var(--card);
+            color: var(--primary);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Scoreboard */
+        .scoreboard {
+            display: grid;
+            gap: 8px;
+            align-items: center;
+            background: var(--primary);
+            color: white;
+            padding: 14px 10px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 10px rgba(30, 41, 59, 0.25);
+        }
+        .scoreboard.cols-2 { grid-template-columns: 1fr 1fr; }
+        .scoreboard.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+        .player-col {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 4px;
+            border-right: 1px solid rgba(255,255,255,0.12);
+        }
+        .player-col:last-child { border-right: none; }
+
+        .name-input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-align: center;
+            width: 100%;
+            padding: 6px 4px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+        }
+        .name-input:focus {
+            outline: none;
+            border-color: #38bdf8;
+            background: rgba(255,255,255,0.18);
+        }
+        .dealer-badge {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            padding: 2px 8px;
+            border-radius: 99px;
+            background: rgba(255,255,255,0.12);
+            color: #cbd5e1;
+            cursor: pointer;
+            margin-bottom: 6px;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .dealer-badge.active {
+            background: var(--gold);
+            color: white;
+            font-weight: 700;
+        }
+        .score-number {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-top: 2px;
+        }
+        .scoreboard.cols-3 .score-number {
+            font-size: 2.3rem;
+        }
+        .round-delta {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #5eead4;
+            min-height: 1.2em;
+            margin-top: 4px;
+        }
+
+        /* Categories */
+        .category {
+            margin-bottom: 12px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #fafafa;
+        }
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .category-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--primary);
+        }
+        .category-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        /* Segmented Buttons */
+        .segmented-group {
+            display: grid;
+            gap: 6px;
+        }
+        .segmented-group.cols-2 {
+            grid-template-columns: 1fr 1fr 0.75fr;
+        }
+        .segmented-group.cols-3 {
+            grid-template-columns: 1fr 1fr 1fr 0.75fr;
+        }
+        .seg-btn {
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 4px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .seg-btn.active-player {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);
+        }
+        .seg-btn.active-tie {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .seg-btn.unassigned-warn {
+            border-color: #f59e0b;
+            background: var(--gold-light);
+            color: #92400e;
+        }
+
+        /* Scopa Counter */
+        .scopa-grid {
+            display: grid;
+            gap: 8px;
+        }
+        .scopa-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+        .scopa-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+        .scopa-box {
+            background: white;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .scopa-player-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--muted);
+            margin-bottom: 6px;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .scopa-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .counter-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .counter-btn:active { transform: scale(0.95); }
+        .scopa-val {
+            font-size: 1.25rem;
+            font-weight: 800;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .submit-btn {
+            background: var(--accent);
+            color: white;
+            margin-top: 6px;
+            box-shadow: 0 4px 10px rgba(15, 118, 110, 0.25);
+        }
+        .secondary-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .undo-btn {
+            background: #e2e8f0;
+            color: var(--primary);
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+        .reset-btn {
+            background: #fee2e2;
+            color: var(--danger);
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+
+        /* History */
+        .history {
+            margin-top: 20px;
+            border-top: 2px solid var(--border);
+            padding-top: 14px;
+        }
+        .history-header {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 10px 0;
+        }
+        .history-item {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+        .history-top {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+        .history-details {
+            color: var(--muted);
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+
+        /* Winner Banner */
+        .win-banner {
+            display: none;
+            background: var(--gold-light);
+            border: 2px solid var(--gold);
+            color: #92400e;
+            padding: 14px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 1.05rem;
+            margin-bottom: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-bar">
+        <h1 class="app-title">🃏 Scopa Tracker</h1>
+        <div class="target-selector">
+            <span>Play to:</span>
+            <select id="target-score" onchange="changeTarget()">
+                <option value="11">11 pts</option>
+                <option value="16">16 pts</option>
+                <option value="21">21 pts</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Game Mode Selector -->
+    <div class="mode-bar">
+        <button type="button" class="mode-btn" id="mode-1v1" onclick="setMode('1v1')">👤 1v1</button>
+        <button type="button" class="mode-btn" id="mode-teams" onclick="setMode('teams')">👥 2v2 Teams</button>
+        <button type="button" class="mode-btn" id="mode-3p" onclick="setMode('3p')">👤👤👤 3-Player</button>
+    </div>
+
+    <div id="win-banner" class="win-banner"></div>
+
+    <!-- Dynamic Scoreboard -->
+    <div id="scoreboard" class="scoreboard cols-2"></div>
+
+    <!-- Scopas (Mid-Hand) -->
+    <div class="category">
+        <div class="category-header">
+            <span class="category-title">🧹 Scopas (Sweeps)</span>
+            <span class="category-sub">Tap as they happen</span>
+        </div>
+        <div id="scopa-grid" class="scopa-grid cols-2"></div>
+    </div>
+
+    <!-- End of Hand Categories -->
+    <div class="category">
+        <div class="category-header">
+            <span class="category-title">📚 Carte (Most Cards)</span>
+            <span class="category-sub" id="carte-sub">21+ cards (20-20 = Tie)</span>
+        </div>
+        <div id="cat-carte" class="segmented-group cols-2"></div>
+    </div>
+
+    <div class="category">
+        <div class="category-header">
+            <span class="category-title">🪙 Denari / Oro (Most Coins)</span>
+            <span class="category-sub">Most of the 10 coins</span>
+        </div>
+        <div id="cat-oro" class="segmented-group cols-2"></div>
+    </div>
+
+    <div class="category">
+        <div class="category-header">
+            <span class="category-title">👑 Settebello (7 of Coins)</span>
+            <span class="category-sub">Always awarded</span>
+        </div>
+        <div id="cat-settebello" class="segmented-group cols-2"></div>
+    </div>
+
+    <div class="category">
+        <div class="category-header">
+            <span class="category-title">✨ Primiera (Best Prime)</span>
+            <span class="category-sub">7=21, 6=18, A=16, 5=15</span>
+        </div>
+        <div id="cat-primiera" class="segmented-group cols-2"></div>
+    </div>
+
+    <button type="button" class="action-btn submit-btn" id="submit-btn" onclick="submitRound()">
+        Submit Hand
+    </button>
+
+    <div class="secondary-actions">
+        <button type="button" class="action-btn undo-btn" onclick="undoLastRound()">↩ Undo Hand</button>
+        <button type="button" class="action-btn reset-btn" onclick="resetGame()">New Game</button>
+    </div>
+
+    <div class="history">
+        <h2 class="history-header">Hand History</h2>
+        <div id="history-log"></div>
+    </div>
+</div>
+
+<script>
+    const DEFAULT_NAMES = {
+        '1v1': ['Player 1', 'Player 2'],
+        'teams': ['Team 1', 'Team 2'],
+        '3p': ['Player 1', 'Player 2', 'Player 3']
+    };
+
+    let state = {
+        mode: '1v1', // '1v1', 'teams', '3p'
+        names: ['Player 1', 'Player 2'],
+        scores: [0, 0],
+        targetScore: 11,
+        dealerIdx: 0,
+        rounds: []
+    };
+
+    let currentRound = {
+        scopas: [0, 0],
+        carte: 'tie',
+        oro: 'tie',
+        settebello: 'none',
+        primiera: 'tie'
+    };
+
+    function getPlayerCount() {
+        return state.mode === '3p' ? 3 : 2;
+    }
+
+    function init() {
+        const saved = localStorage.getItem('scopaStateV2_1');
+        if (saved) {
+            try { state = JSON.parse(saved); } catch (e) {}
+        }
+        document.getElementById('target-score').value = state.targetScore || 11;
+        resetCurrentRoundState();
+        renderFullUI();
+    }
+
+    function saveState() {
+        localStorage.setItem('scopaStateV2_1', JSON.stringify(state));
+    }
+
+    function changeTarget() {
+        state.targetScore = parseInt(document.getElementById('target-score').value, 10);
+        saveState();
+        checkWin();
+    }
+
+    function setMode(newMode) {
+        if (newMode === state.mode) return;
+        const hasActiveScores = state.scores.some(s => s > 0) || state.rounds.length > 0;
+        if (hasActiveScores) {
+            if (!confirm("Switching game mode will start a new game. Continue?")) return;
+        }
+
+        state.mode = newMode;
+        const count = getPlayerCount();
+        state.names = [...DEFAULT_NAMES[newMode]];
+        state.scores = Array(count).fill(0);
+        state.dealerIdx = 0;
+        state.rounds = [];
+
+        resetCurrentRoundState();
+        saveState();
+        renderFullUI();
+    }
+
+    function resetCurrentRoundState() {
+        const count = getPlayerCount();
+        currentRound = {
+            scopas: Array(count).fill(0),
+            carte: 'tie',
+            oro: 'tie',
+            settebello: 'none',
+            primiera: 'tie'
+        };
+    }
+
+    function renderFullUI() {
+        const count = getPlayerCount();
+        const colClass = count === 3 ? 'cols-3' : 'cols-2';
+
+        // Mode buttons active state
+        ['1v1', 'teams', '3p'].forEach(m => {
+            document.getElementById(`mode-${m}`).className = 'mode-btn' + (state.mode === m ? ' active' : '');
+        });
+
+        // Subtitle update for Carte
+        document.getElementById('carte-sub').innerText = count === 3
+            ? 'Most cards (ties = no point)'
+            : '21+ cards (20-20 = Tie)';
+
+        // 1. Render Scoreboard
+        const sb = document.getElementById('scoreboard');
+        sb.className = `scoreboard ${colClass}`;
+        sb.innerHTML = state.names.map((name, idx) => `
+            <div class="player-col">
+                <div class="dealer-badge ${state.dealerIdx === idx ? 'active' : ''}" onclick="setDealer(${idx})">
+                    ${state.dealerIdx === idx ? '🎴 Dealer' : 'Dealer'}
+                </div>
+                <input type="text" class="name-input" value="${escapeHtml(name)}" oninput="updateName(${idx}, this.value)">
+                <div class="score-number" id="score-${idx}">${state.scores[idx]}</div>
+                <div class="round-delta" id="preview-${idx}">+0 this hand</div>
+            </div>
+        `).join('');
+
+        // 2. Render Scopa Counters
+        const sg = document.getElementById('scopa-grid');
+        sg.className = `scopa-grid ${colClass}`;
+        sg.innerHTML = state.names.map((name, idx) => `
+            <div class="scopa-box">
+                <span class="scopa-player-label name-label-${idx}">${escapeHtml(name)}</span>
+                <div class="scopa-controls">
+                    <button type="button" class="counter-btn" onclick="adjScopa(${idx}, -1)">−</button>
+                    <span id="scopa-val-${idx}" class="scopa-val">${currentRound.scopas[idx]}</span>
+                    <button type="button" class="counter-btn" onclick="adjScopa(${idx}, 1)">+</button>
+                </div>
+            </div>
+        `).join('');
+
+        // 3. Render Category Buttons
+        renderCategoryGroup('carte', 'Tie', 'tie');
+        renderCategoryGroup('oro', 'Tie', 'tie');
+        renderCategoryGroup('settebello', 'Select...', 'none');
+        renderCategoryGroup('primiera', 'Tie', 'tie');
+
+        updatePreview();
+        renderHistory();
+        checkWin();
+    }
+
+    function renderCategoryGroup(cat, neutralLabel, neutralVal) {
+        const count = getPlayerCount();
+        const colClass = count === 3 ? 'cols-3' : 'cols-2';
+        const container = document.getElementById(`cat-${cat}`);
+        container.className = `segmented-group ${colClass}`;
+
+        const selected = currentRound[cat];
+
+        let html = state.names.map((name, idx) => {
+            const isAct = selected === idx;
+            return `<div class="seg-btn name-label-${idx} ${isAct ? 'active-player' : ''}" onclick="selectCat('${cat}', ${idx})">${escapeHtml(name)}</div>`;
+        }).join('');
+
+        const isNeutral = selected === neutralVal;
+        const neutralClass = isNeutral ? (neutralVal === 'none' ? 'unassigned-warn' : 'active-tie') : '';
+        html += `<div class="seg-btn ${neutralClass}" onclick="selectCat('${cat}', '${neutralVal}')">${neutralLabel}</div>`;
+
+        container.innerHTML = html;
+    }
+
+    function updateName(idx, val) {
+        const fallback = DEFAULT_NAMES[state.mode][idx];
+        state.names[idx] = val.trim() || fallback;
+        document.querySelectorAll(`.name-label-${idx}`).forEach(el => {
+            el.innerText = state.names[idx];
+        });
+        saveState();
+        renderHistory();
+        checkWin();
+    }
+
+    function setDealer(idx) {
+        state.dealerIdx = idx;
+        saveState();
+        renderFullUI();
+    }
+
+    function adjScopa(idx, delta) {
+        currentRound.scopas[idx] = Math.max(0, currentRound.scopas[idx] + delta);
+        document.getElementById(`scopa-val-${idx}`).innerText = currentRound.scopas[idx];
+        updatePreview();
+    }
+
+    function selectCat(cat, val) {
+        currentRound[cat] = val;
+        const neutralLabel = cat === 'settebello' ? 'Select...' : 'Tie';
+        const neutralVal = cat === 'settebello' ? 'none' : 'tie';
+        renderCategoryGroup(cat, neutralLabel, neutralVal);
+        updatePreview();
+    }
+
+    function calcPreview() {
+        const count = getPlayerCount();
+        const pts = [...currentRound.scopas];
+        ['carte', 'oro', 'settebello', 'primiera'].forEach(cat => {
+            const winner = currentRound[cat];
+            if (typeof winner === 'number' && winner < count) {
+                pts[winner]++;
+            }
+        });
+        return pts;
+    }
+
+    function updatePreview() {
+        const pts = calcPreview();
+        pts.forEach((p, idx) => {
+            const el = document.getElementById(`preview-${idx}`);
+            if (el) el.innerText = `+${p} this hand`;
+        });
+        const summary = pts.map(p => `+${p}`).join(' / ');
+        document.getElementById('submit-btn').innerText = `Submit Hand (${summary})`;
+    }
+
+    function submitRound() {
+        if (currentRound.settebello === 'none') {
+            if (!confirm("Settebello (7 of Coins) isn't selected yet! Submit hand anyway?")) {
+                return;
+            }
+        }
+
+        const count = getPlayerCount();
+        const pts = calcPreview();
+        const breakdowns = Array.from({ length: count }, () => []);
+
+        if (typeof currentRound.carte === 'number') breakdowns[currentRound.carte].push('Cards');
+        if (typeof currentRound.oro === 'number') breakdowns[currentRound.oro].push('Oro');
+        if (typeof currentRound.settebello === 'number') breakdowns[currentRound.settebello].push('7B');
+        if (typeof currentRound.primiera === 'number') breakdowns[currentRound.primiera].push('Primiera');
+
+        currentRound.scopas.forEach((sc, idx) => {
+            if (sc > 0) breakdowns[idx].push(`${sc} Scopa`);
+        });
+
+        pts.forEach((p, idx) => {
+            state.scores[idx] += p;
+        });
+
+        state.dealerIdx = (state.dealerIdx + 1) % count;
+
+        state.rounds.unshift({
+            roundNum: state.rounds.length + 1,
+            pts,
+            breakdowns: breakdowns.map(b => b.join(', ') || 'None')
+        });
+
+        resetCurrentRoundState();
+        saveState();
+        renderFullUI();
+    }
+
+    function undoLastRound() {
+        if (state.rounds.length === 0) return;
+        const count = getPlayerCount();
+        const last = state.rounds.shift();
+        last.pts.forEach((p, idx) => {
+            state.scores[idx] = Math.max(0, state.scores[idx] - p);
+        });
+        state.dealerIdx = (state.dealerIdx - 1 + count) % count;
+        saveState();
+        renderFullUI();
+    }
+
+    function renderHistory() {
+        const log = document.getElementById('history-log');
+        if (state.rounds.length === 0) {
+            log.innerHTML = `<div style="color:var(--muted); font-size:0.85rem; text-align:center; padding:12px;">No hands played yet.</div>`;
+            return;
+        }
+        log.innerHTML = state.rounds.map(r => {
+            const topSummary = state.names.map((n, i) => `${escapeHtml(n)} +${r.pts[i]}`).join(' | ');
+            const details = state.names.map((n, i) => `<strong>${escapeHtml(n)}:</strong> ${r.breakdowns[i]}`).join(' &bull; ');
+            return `
+                <div class="history-item">
+                    <div class="history-top">
+                        <span>Hand ${r.roundNum}</span>
+                        <span>${topSummary}</span>
+                    </div>
+                    <div class="history-details">${details}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function checkWin() {
+        const target = state.targetScore || 11;
+        const banner = document.getElementById('win-banner');
+        const maxScore = Math.max(...state.scores);
+
+        if (maxScore >= target) {
+            const leaders = state.scores
+                .map((s, idx) => ({ s, name: state.names[idx] }))
+                .filter(item => item.s === maxScore);
+
+            if (leaders.length === 1) {
+                const scoreStr = state.scores.join(' - ');
+                banner.style.display = 'block';
+                banner.innerText = `🏆 ${leaders[0].name} Wins (${scoreStr})!`;
+            } else {
+                const tiedNames = leaders.map(l => l.name).join(' & ');
+                banner.style.display = 'block';
+                banner.innerText = `⚡ ${tiedNames} tied at ${maxScore}! Play another hand!`;
+            }
+        } else {
+            banner.style.display = 'none';
+        }
+    }
+
+    function resetGame() {
+        if (confirm("Start a brand new game?")) {
+            const count = getPlayerCount();
+            state.scores = Array(count).fill(0);
+            state.rounds = [];
+            resetCurrentRoundState();
+            saveState();
+            renderFullUI();
+        }
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[m]));
+    }
+
+    init();
+</script>
+
+</body>
+</html>
