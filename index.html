@@ -8,12 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Scopa Tracker</title>
 
-    <!-- Embedded SVG App Icon (Settebello / 7 of Coins) -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231e293b'/%3E%3Crect x='96' y='56' width='320' height='400' rx='32' fill='%23ffffff' stroke='%23d97706' stroke-width='16'/%3E%3Ccircle cx='256' cy='256' r='88' fill='%23f59e0b' stroke='%23b45309' stroke-width='10'/%3E%3Ctext x='256' y='288' font-family='sans-serif' font-size='92' font-weight='900' fill='%231e293b' text-anchor='middle'%3E7%3C/text%3E%3Ctext x='145' y='125' font-family='sans-serif' font-size='48' font-weight='800' fill='%23d97706'%3E7%3C/text%3E%3Ctext x='367' y='415' font-family='sans-serif' font-size='48' font-weight='800' fill='%23d97706' text-anchor='end'%3E7%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%231e293b'/%3E%3Crect x='96' y='56' width='320' height='400' rx='32' fill='%23ffffff' stroke='%23d97706' stroke-width='16'/%3E%3Ccircle cx='256' cy='256' r='88' fill='%23f59e0b' stroke='%23b45309' stroke-width='10'/%3E%3Ctext x='256' y='288' font-family='sans-serif' font-size='92' font-weight='900' fill='%231e293b' text-anchor='middle'%3E7%3C/text%3E%3C/svg%3E">
-
-    <!-- Web App Manifest for Android App Drawer Installation -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Scopa Scorekeeper","short_name":"Scopa","start_url":".","display":"standalone","background_color":"#1e293b","theme_color":"#1e293b","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27%3E%3Crect width=%27512%27 height=%27512%27 rx=%27112%27 fill=%27%231e293b%27/%3E%3Crect x=%2796%27 y=%2756%27 width=%27320%27 height=%27400%27 rx=%2732%27 fill=%27%23ffffff%27 stroke=%27%23d97706%27 stroke-width=%2716%27/%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%2788%27 fill=%27%23f59e0b%27 stroke=%27%23b45309%27 stroke-width=%2710%27/%3E%3Ctext x=%27256%27 y=%27288%27 font-family=%27sans-serif%27 font-size=%2792%27 font-weight=%27900%27 fill=%27%231e293b%27 text-anchor=%27middle%27%3E7%3C/text%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]}'>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="https://placehold.co/192x192/1e293b/f59e0b.png?text=7">
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/1e293b/f59e0b.png?text=7">
 
     <style>
         :root {
@@ -51,7 +48,6 @@
             margin-bottom: 24px;
         }
 
-        /* Install Banner */
         .install-banner {
             display: none;
             background: #eff6ff;
@@ -76,7 +72,6 @@
             cursor: pointer;
         }
 
-        /* Header & Settings Bar */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -113,7 +108,6 @@
             cursor: pointer;
         }
 
-        /* Mode Switcher Pills */
         .mode-bar {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -140,7 +134,6 @@
             box-shadow: 0 1px 4px rgba(0,0,0,0.1);
         }
 
-        /* Scoreboard */
         .scoreboard {
             display: grid;
             gap: 8px;
@@ -217,7 +210,6 @@
             margin-top: 4px;
         }
 
-        /* Categories */
         .category {
             margin-bottom: 12px;
             padding: 12px;
@@ -242,7 +234,6 @@
             font-weight: 500;
         }
 
-        /* Segmented Buttons */
         .segmented-group {
             display: grid;
             gap: 6px;
@@ -288,7 +279,6 @@
             color: #92400e;
         }
 
-        /* Scopa Counter */
         .scopa-grid {
             display: grid;
             gap: 8px;
@@ -342,7 +332,6 @@
             text-align: center;
         }
 
-        /* Action Buttons */
         .action-btn {
             width: 100%;
             padding: 15px;
@@ -377,7 +366,6 @@
             font-size: 0.9rem;
         }
 
-        /* History */
         .history {
             margin-top: 20px;
             border-top: 2px solid var(--border);
@@ -410,7 +398,6 @@
             line-height: 1.4;
         }
 
-        /* Winner Banner */
         .win-banner {
             display: none;
             background: var(--gold-light);
@@ -428,7 +415,6 @@
 <body>
 
 <div class="container">
-    <!-- One-Tap App Drawer Install Banner (shows automatically when supported) -->
     <div id="install-banner" class="install-banner">
         <span>📲 Add Scopa Tracker to App Drawer</span>
         <button type="button" class="install-btn" onclick="triggerInstall()">Install App</button>
@@ -446,7 +432,6 @@
         </div>
     </div>
 
-    <!-- Game Mode Selector -->
     <div class="mode-bar">
         <button type="button" class="mode-btn" id="mode-1v1" onclick="setMode('1v1')">👤 1v1</button>
         <button type="button" class="mode-btn" id="mode-teams" onclick="setMode('teams')">👥 2v2 Teams</button>
@@ -455,10 +440,8 @@
 
     <div id="win-banner" class="win-banner"></div>
 
-    <!-- Dynamic Scoreboard -->
     <div id="scoreboard" class="scoreboard cols-2"></div>
 
-    <!-- Scopas (Mid-Hand) -->
     <div class="category">
         <div class="category-header">
             <span class="category-title">🧹 Scopas (Sweeps)</span>
@@ -467,7 +450,6 @@
         <div id="scopa-grid" class="scopa-grid cols-2"></div>
     </div>
 
-    <!-- End of Hand Categories -->
     <div class="category">
         <div class="category-header">
             <span class="category-title">📚 Carte (Most Cards)</span>
@@ -516,6 +498,10 @@
 </div>
 
 <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js');
+    }
+
     const DEFAULT_NAMES = {
         '1v1': ['Player 1', 'Player 2'],
         'teams': ['Team 1', 'Team 2'],
@@ -825,7 +811,6 @@
         }[m]));
     }
 
-    // PWA App Drawer Install Support
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
